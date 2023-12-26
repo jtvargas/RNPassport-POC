@@ -9,6 +9,8 @@ import {
   Button,
   SafeAreaView,
   Dimensions,
+  NativeModules,
+  NativeEventEmitter,
 } from 'react-native';
 import {
   Camera,
@@ -17,6 +19,8 @@ import {
   useCameraFormat,
   useFrameProcessor,
   runAtTargetFps,
+  VisionCameraProxy,
+  Frame,
 } from 'react-native-vision-camera';
 import { useAppState } from '@react-native-community/hooks';
 import { scanOCR } from '@ismaelmoreiraa/vision-camera-ocr';
@@ -98,6 +102,12 @@ type ResultFrame = {
 export type OCRFrame = {
   result: ResultFrame;
 };
+
+const MRZScannerModule = NativeModules.MRZScanner;
+const MRZScannerEvents = new NativeEventEmitter(MRZScannerModule);
+const MRZCameraPlugin = VisionCameraProxy.initFrameProcessorPlugin('MRZScan');
+
+// MRZScannerEvents.initMRZ();
 
 // function hasValidPassport(mrz: string) {
 //   // Regular expression to match passport types
@@ -189,19 +199,8 @@ function CameraView({ onCloseCamera, isCameraActive }) {
   const [blockValid, setBlockValid] = useState<TextBlock>(null);
   // const ocrResults = useSharedValue<OCRFrame | null>(null);
 
-  useEffect(() => {
-    if (blockValid) {
-      // const passportMrz = reduce(
-      //   blockValid,
-      //   (curr, block) => {
-      //     const lineText = map(block?.lines, b => b.text).join('');
-      //     return curr + lineText;
-      //   },
-      //   '',
-      // );
-      console.log({ blockValid });
-    }
-  }, [blockValid]);
+  // "MRZ_DETECTION_SUCCESSFUL", "MRZ_ANALYZING_PENDING", "MRZ_INITIALIZED", "MRZ_NOT_INITIALIZED"
+  // Adding event listeners and cleanup logic for native module events
 
   const takePhoto = async () => {
     const photo = await camera.current.takePhoto({
@@ -244,6 +243,8 @@ function CameraView({ onCloseCamera, isCameraActive }) {
   const frameProcessor = useFrameProcessor(frame => {
     'worklet';
 
+    const mrzResult = MRZCameraPlugin.call(frame);
+    console.log({ mrzResult });
     // console.log(`Frame: ${frame.width}x${frame.height} (${frame.pixelFormat})`);
 
     // // ocrResults.value = `Frame: ${frame.width}x${frame.height} (${frame.pixelFormat})`;
@@ -361,6 +362,35 @@ export default function App() {
   const [showCamera, setShowCamera] = useState(false);
   const { hasPermission, requestPermission } = useCameraPermission();
 
+  useEffect(() => {
+    MRZScannerEvents.addListener('MRZ_NOT_INITIALIZED', result => {
+      console.log({ NATIVE_EVENT: 'MRZ_NOT_INITIALIZED', value: result });
+    });
+    MRZScannerEvents.addListener('MRZ_INITIALIZED', result => {
+      console.log({ NATIVE_EVENT: 'MRZ_INITIALIZED', value: result });
+    });
+    MRZScannerEvents.addListener('MRZ_ANALYZING_PENDING', result => {
+      console.log({ NATIVE_EVENT: 'MRZ_ANALYZING_PENDING', value: result });
+    });
+    MRZScannerEvents.addListener('MRZ_DETECTION_SUCCESSFUL', result => {
+      console.log({ NATIVE_EVENT: 'MRZ_DETECTION_SUCCESSFUL', value: result });
+    });
+    MRZScannerEvents.addListener('MRZ_INIT_WITH_DEFAULT_CONFIG', result => {
+      console.log({
+        NATIVE_EVENT: 'MRZ_INIT_WITH_DEFAULT_CONFIG',
+        value: result,
+      });
+    });
+
+    return () => {
+      MRZScannerEvents.removeAllListeners('MRZ_NOT_INITIALIZED');
+      MRZScannerEvents.removeAllListeners('MRZ_INITIALIZED');
+      MRZScannerEvents.removeAllListeners('MRZ_ANALYZING_PENDING');
+      MRZScannerEvents.removeAllListeners('MRZ_DETECTION_SUCCESSFUL');
+      MRZScannerEvents.removeAllListeners('MRZ_INIT_WITH_DEFAULT_CONFIG');
+    };
+  }, []);
+
   const verifyPermissions = async () => {
     if (hasPermission) {
       return Promise.resolve(true);
@@ -379,6 +409,7 @@ export default function App() {
   };
 
   const handleOpenCamera = async () => {
+    // MRZScannerModule.processFrames(1, "[{ hello: '1' }]", 320, 320, 0, 1);
     const canOpenCamera = await verifyPermissions();
     if (canOpenCamera) {
       setShowCamera(true);

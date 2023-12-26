@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		066F44642B388A470039268E /* ultimate_mrz-sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 066F44622B3885BD0039268E /* ultimate_mrz-sdk.framework */; };
+		066F44652B388A470039268E /* ultimate_mrz-sdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 066F44622B3885BD0039268E /* ultimate_mrz-sdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		066F446D2B38C5D50039268E /* MRZScannerWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 066F446C2B38C5D50039268E /* MRZScannerWrapper.m */; };
+		066F446F2B38C7C70039268E /* MRZScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066F446E2B38C7C70039268E /* MRZScanner.swift */; };
+		066F44712B38C8680039268E /* MRZScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 066F44702B38C8680039268E /* MRZScanner.m */; };
+		066F44722B3940540039268E /* mrz.classifier.params.json.doubango in Resources */ = {isa = PBXBuildFile; fileRef = 06132E472B3880260078DD2A /* mrz.classifier.params.json.doubango */; };
+		066F44732B3940540039268E /* mrz.classifier.strong.model.flat in Resources */ = {isa = PBXBuildFile; fileRef = 06132E482B3880260078DD2A /* mrz.classifier.strong.model.flat */; };
+		066F44742B3940540039268E /* mrz.classifier.strong.pca.json in Resources */ = {isa = PBXBuildFile; fileRef = 06132E462B3880260078DD2A /* mrz.classifier.strong.pca.json */; };
+		066F44752B3940540039268E /* mrz.traineddata in Resources */ = {isa = PBXBuildFile; fileRef = 06132E492B3880260078DD2A /* mrz.traineddata */; };
+		066F44772B3A74660039268E /* MRZFrameProcessorPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066F44762B3A74660039268E /* MRZFrameProcessorPlugin.swift */; };
+		066F44792B3A74F30039268E /* MRZFrameProcessorPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 066F44782B3A74F30039268E /* MRZFrameProcessorPlugin.m */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -17,7 +28,33 @@
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		066F44662B388A470039268E /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				066F44652B388A470039268E /* ultimate_mrz-sdk.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		06132E442B387FC20078DD2A /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; path = models; sourceTree = "<group>"; };
+		06132E462B3880260078DD2A /* mrz.classifier.strong.pca.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = mrz.classifier.strong.pca.json; path = models/mrz.classifier.strong.pca.json; sourceTree = "<group>"; };
+		06132E472B3880260078DD2A /* mrz.classifier.params.json.doubango */ = {isa = PBXFileReference; lastKnownFileType = file; name = mrz.classifier.params.json.doubango; path = models/mrz.classifier.params.json.doubango; sourceTree = "<group>"; };
+		06132E482B3880260078DD2A /* mrz.classifier.strong.model.flat */ = {isa = PBXFileReference; lastKnownFileType = file; name = mrz.classifier.strong.model.flat; path = models/mrz.classifier.strong.model.flat; sourceTree = "<group>"; };
+		06132E492B3880260078DD2A /* mrz.traineddata */ = {isa = PBXFileReference; lastKnownFileType = file; name = mrz.traineddata; path = models/mrz.traineddata; sourceTree = "<group>"; };
+		066F44622B3885BD0039268E /* ultimate_mrz-sdk.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "ultimate_mrz-sdk.framework"; path = "System/Library/Frameworks/ultimate_mrz-sdk.framework"; sourceTree = SDKROOT; };
+		066F446B2B38C5280039268E /* MRZScannerWrapper.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = MRZScannerWrapper.h; sourceTree = "<group>"; };
+		066F446C2B38C5D50039268E /* MRZScannerWrapper.m */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = MRZScannerWrapper.m; sourceTree = "<group>"; };
+		066F446E2B38C7C70039268E /* MRZScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MRZScanner.swift; sourceTree = "<group>"; };
+		066F44702B38C8680039268E /* MRZScanner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MRZScanner.m; sourceTree = "<group>"; };
+		066F44762B3A74660039268E /* MRZFrameProcessorPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MRZFrameProcessorPlugin.swift; sourceTree = "<group>"; };
+		066F44782B3A74F30039268E /* MRZFrameProcessorPlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MRZFrameProcessorPlugin.m; sourceTree = "<group>"; };
 		0B6D9E98CD5045C7AAA9551A /* RNPassportPOC-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "RNPassportPOC-Bridging-Header.h"; path = "RNPassportPOC/RNPassportPOC-Bridging-Header.h"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* RNPassportPOC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RNPassportPOC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = RNPassportPOC/AppDelegate.h; sourceTree = "<group>"; };
@@ -40,6 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				066F44642B388A470039268E /* ultimate_mrz-sdk.framework in Frameworks */,
 				96905EF65AED1B983A6B3ABC /* libPods-RNPassportPOC.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -59,6 +97,12 @@
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				E363672C478A44E8A9050A12 /* noop-file.swift */,
 				0B6D9E98CD5045C7AAA9551A /* RNPassportPOC-Bridging-Header.h */,
+				066F446B2B38C5280039268E /* MRZScannerWrapper.h */,
+				066F446C2B38C5D50039268E /* MRZScannerWrapper.m */,
+				066F446E2B38C7C70039268E /* MRZScanner.swift */,
+				066F44702B38C8680039268E /* MRZScanner.m */,
+				066F44762B3A74660039268E /* MRZFrameProcessorPlugin.swift */,
+				066F44782B3A74F30039268E /* MRZFrameProcessorPlugin.m */,
 			);
 			name = RNPassportPOC;
 			sourceTree = "<group>";
@@ -66,6 +110,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				066F44622B3885BD0039268E /* ultimate_mrz-sdk.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				58EEBF8E8E6FB1BC6CAF49B5 /* libPods-RNPassportPOC.a */,
 			);
@@ -82,6 +127,11 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				06132E472B3880260078DD2A /* mrz.classifier.params.json.doubango */,
+				06132E482B3880260078DD2A /* mrz.classifier.strong.model.flat */,
+				06132E462B3880260078DD2A /* mrz.classifier.strong.pca.json */,
+				06132E492B3880260078DD2A /* mrz.traineddata */,
+				06132E442B387FC20078DD2A /* models */,
 				13B07FAE1A68108700A75B9A /* RNPassportPOC */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -152,6 +202,7 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
 				6F8C97EF450A97F725E73515 /* [CP] Embed Pods Frameworks */,
+				066F44662B388A470039268E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -198,6 +249,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				066F44722B3940540039268E /* mrz.classifier.params.json.doubango in Resources */,
+				066F44732B3940540039268E /* mrz.classifier.strong.model.flat in Resources */,
+				066F44742B3940540039268E /* mrz.classifier.strong.pca.json in Resources */,
+				066F44752B3940540039268E /* mrz.traineddata in Resources */,
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
@@ -332,8 +387,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				066F446F2B38C7C70039268E /* MRZScanner.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				066F44712B38C8680039268E /* MRZScanner.m in Sources */,
+				066F44772B3A74660039268E /* MRZFrameProcessorPlugin.swift in Sources */,
+				066F44792B3A74F30039268E /* MRZFrameProcessorPlugin.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				066F446D2B38C5D50039268E /* MRZScannerWrapper.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
 				AAFEAEE4B9544FF895373D92 /* noop-file.swift in Sources */,
 			);
@@ -352,6 +412,17 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J7K9Z79S5F;
 				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"${DEVELOPER_FRAMEWORKS_DIR}/ultimateMRZ-SDK/binaries/ios\"",
+					"$(inherited)",
+					"\"${PODS_ROOT}/MLImage/Frameworks\"",
+					"\"${PODS_ROOT}/MLKitCommon/Frameworks\"",
+					"\"${PODS_ROOT}/MLKitTextRecognition/Frameworks\"",
+					"\"${PODS_ROOT}/MLKitTextRecognitionCommon/Frameworks\"",
+					"\"${PODS_ROOT}/MLKitVision/Frameworks\"",
+					"\"${PODS_ROOT}/hermes-engine/destroot/Library/Frameworks/universal\"",
+					"\"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built\"",
+				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
@@ -388,6 +459,17 @@
 				CODE_SIGN_ENTITLEMENTS = RNPassportPOC/RNPassportPOC.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J7K9Z79S5F;
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"${DEVELOPER_FRAMEWORKS_DIR}/ultimateMRZ-SDK/binaries/ios\"",
+					"$(inherited)",
+					"\"${PODS_ROOT}/MLImage/Frameworks\"",
+					"\"${PODS_ROOT}/MLKitCommon/Frameworks\"",
+					"\"${PODS_ROOT}/MLKitTextRecognition/Frameworks\"",
+					"\"${PODS_ROOT}/MLKitTextRecognitionCommon/Frameworks\"",
+					"\"${PODS_ROOT}/MLKitVision/Frameworks\"",
+					"\"${PODS_ROOT}/hermes-engine/destroot/Library/Frameworks/universal\"",
+					"\"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built\"",
+				);
 				INFOPLIST_FILE = RNPassportPOC/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
