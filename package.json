@@ -17,9 +17,11 @@
     "expo-splash-screen": "~0.20.5",
     "expo-status-bar": "~1.6.0",
     "lodash": "^4.17.21",
+    "mrz": "^3.4.1",
     "react": "18.2.0",
     "react-native": "0.72.6",
     "react-native-reanimated": "^3.5.4",
+    "react-native-text-recognition": "^1.0.0",
     "react-native-vision-camera": "^3.6.17",
     "react-native-worklets-core": "0.2.4",
     "typescript": "^5.1.3"

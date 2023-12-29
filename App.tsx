@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 
 import {
@@ -9,8 +9,6 @@ import {
   Button,
   SafeAreaView,
   Dimensions,
-  NativeModules,
-  NativeEventEmitter,
 } from 'react-native';
 import {
   Camera,
@@ -18,31 +16,13 @@ import {
   useCameraDevice,
   useCameraFormat,
   useFrameProcessor,
-  runAtTargetFps,
   VisionCameraProxy,
-  Frame,
 } from 'react-native-vision-camera';
 import { useAppState } from '@react-native-community/hooks';
 import { scanOCR } from '@ismaelmoreiraa/vision-camera-ocr';
-import { useSharedValue, Worklets } from 'react-native-worklets-core';
-import filter from 'lodash/filter';
-import isNil from 'lodash/isNil';
-import isEmpty from 'lodash/isEmpty';
-import find from 'lodash/find';
-import reduce from 'lodash/reduce';
-import replace from 'lodash/replace';
-import map from 'lodash/map';
+import { Worklets } from 'react-native-worklets-core';
 
-const ScreenAspectRatio =
-  Dimensions.get('window').height / Dimensions.get('window').width;
-
-const VIEW_HEIGHT = Dimensions.get('screen').height;
-const VIEW_WIDTH = Dimensions.get('screen').width;
-
-// const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera);
-// Reanimated.addWhitelistedNativeProps({
-//   zoom: true,
-// });
+import { parse as parseMRZ } from 'mrz';
 
 const styles = StyleSheet.create({
   container: {
@@ -103,84 +83,26 @@ export type OCRFrame = {
   result: ResultFrame;
 };
 
-const MRZScannerModule = NativeModules.MRZScanner;
-const MRZScannerEvents = new NativeEventEmitter(MRZScannerModule);
 const MRZCameraPlugin = VisionCameraProxy.initFrameProcessorPlugin('MRZScan');
 
-// MRZScannerEvents.initMRZ();
+function replaceWildcardsWithOCR(baseString, ocrText) {
+  let result = '';
 
-// function hasValidPassport(mrz: string) {
-//   // Regular expression to match passport types
-//   const passportRegex = /P<|D<|S<|O<|TP</;
-//   return passportRegex.test(mrz);
-// }
+  for (let i = 0; i < baseString.length; i++) {
+    if (baseString[i] === '*') {
+      result += ocrText[i];
+    } else if (ocrText[i] !== baseString[i]) {
+      result += baseString[i];
+    } else {
+      result += baseString[i];
+    }
+  }
+  return result;
+}
 
-// function filterPassportObjects(objects) {
-//   return filter(objects, obj => obj.text && hasValidPassport(obj.text));
-// }
-// function scoreMRZSimilarity(text: string): number {
-//   const mrzPattern = /^[A-Z0-9<]{88}$/;
-
-//   if (isEmpty(text)) return 0;
-//   // Check for multiple 'K's in sequence
-//   if (text.includes('KK')) return 0;
-
-//   let score = 0;
-//   if (mrzPattern.test(text) && hasValidPassport(text)) {
-//     score = text.split('').reduce((acc, char) => {
-//       return acc + (/[A-Z0-9<]/.test(char) ? 1 : 0);
-//     }, 0);
-//   }
-
-//   return score;
-// }
-
-// function adjustStringLength(input: string, targetLength: number): string {
-//   let adjustedString = input.replace(/</g, ''); // Remove all filler characters
-
-//   // If the string is still longer than the target length, truncate it
-//   if (adjustedString.length > targetLength) {
-//     adjustedString = adjustedString.substring(0, targetLength);
-//   }
-
-//   // Optional: If the string is shorter, pad it with filler characters '<'
-//   while (adjustedString.length < targetLength) {
-//     adjustedString += '<';
-//   }
-
-//   return adjustedString;
-// }
-
-// function cleanMRZ(mrz) {
-//   // First, replace any occurrences of "«K" with '<'
-//   let cleanedMRZ = replace(mrz, /«K/g, '<<');
-//   const cleanedMRZWithoutK = replace(cleanedMRZ, /<K</g, '<<<');
-
-//   // Replace any other invalid characters (anything not A-Z, 0-9, or <) with '<'
-//   cleanedMRZ = replace(cleanedMRZWithoutK, /[^A-Z0-9<]/g, '<');
-
-//   return adjustStringLength(cleanedMRZ, 88);
-// }
-
-// // Find a way to extract the MRZ, it looks like is returning me the lines
-// function findMostSimilarMRZ(blocks: TextBlock[]): TextBlock {
-//   let maxScore = 0;
-//   // let mostSimilarString = '';
-//   let mostSimilar = null;
-
-//   blocks.forEach(block => {
-//     const textToAnalize = map(block.lines, line => line.text).join('');
-//     console.log({ textToAnalizeCleaned: cleanMRZ(textToAnalize) });
-//     const score = scoreMRZSimilarity(textToAnalize ?? '');
-//     if (score > maxScore) {
-//       maxScore = score;
-//       // mostSimilarString = block.text;
-//       mostSimilar = block;
-//     }
-//   });
-
-//   return mostSimilar;
-// }
+function splitStringEvery44Chars(str) {
+  return str.match(/.{1,44}/g);
+}
 
 function CameraView({ onCloseCamera, isCameraActive }) {
   const device = useCameraDevice('back', {
@@ -193,67 +115,86 @@ function CameraView({ onCloseCamera, isCameraActive }) {
   const appState = useAppState();
   const isActive = appState === 'active' && isCameraActive;
   const camera = useRef<Camera>(null);
-  const isValid = useRef<boolean>(false);
-  const [ocrResults, setOcr] = useState<OCRFrame | null>(null);
   const [stopCamera, setStopCamera] = useState<boolean>(false);
-  const [blockValid, setBlockValid] = useState<TextBlock>(null);
-  // const ocrResults = useSharedValue<OCRFrame | null>(null);
-
-  // "MRZ_DETECTION_SUCCESSFUL", "MRZ_ANALYZING_PENDING", "MRZ_INITIALIZED", "MRZ_NOT_INITIALIZED"
-  // Adding event listeners and cleanup logic for native module events
-
-  const takePhoto = async () => {
-    const photo = await camera.current.takePhoto({
-      qualityPrioritization: 'speed',
-      flash: 'off',
-    });
-    // const result = await fetch(`file://${photo.path}`);
-    // const data = await result.blob();
-    console.log({ PHOTO_TAKEN: photo });
-  };
-
-  const validMRZ = (blocks: TextBlock[]) => {
-    if (isNil(blocks) || isEmpty(blocks)) {
-      return false;
-    }
-    const blocksValid = filterPassportObjects(blocks);
-    if (!isNil(blocksValid) && !isEmpty(blocksValid)) {
-      const mostSimilarBlock = findMostSimilarMRZ(blocksValid);
-      console.log({ mostSimilarBlock });
-      if (!isNil(mostSimilarBlock) && !isEmpty(mostSimilarBlock)) {
-        console.log({ mostSimilarBlock });
-
-        // setBlockValid(mostSimilarBlock);
-        // setStopCamera(true);
+  useState<string>('');
+  const [mrzTextResult, setMRZText] = useState<string>('');
+  const [mrzData, setMRZData] = useState<
+    | {
+        lastName: string;
+        firstName: string;
+        nationality: string;
+        documentNumber: string;
       }
-      return true;
-    }
-    return false;
-  };
+    | Record<string, never>
+  >({});
 
-  const updateOcrValueInJS = Worklets.createRunInJsFn((ocrValue: OCRFrame) => {
-    // console.log('RUN IN JS AFTER WORKLET', ocrValue);
-    // isValid.current = true;
-    // ocrResults.value = ocrValue;
-    // setOcr(ocrValue as OCRFrame);
-    // const isValidMRZ = validMRZ(ocrValue.result.blocks);
-    // console.log(`is valid MRZ: ${isValidMRZ}`);
-  });
+  const updateOcrValueInJS = Worklets.createRunInJsFn(
+    ({
+      mrzCombinedLines,
+      ocrResult,
+      isValidResult,
+    }: {
+      isValidResult: boolean;
+      mrzCombinedLines: string;
+      ocrResult: string[];
+    }) => {
+      if (isValidResult) {
+        const mrzCleaned = replaceWildcardsWithOCR(
+          mrzCombinedLines,
+          ocrResult.join(''),
+        );
+        const mrzParsed = parseMRZ(splitStringEvery44Chars(mrzCleaned));
+        if (mrzParsed?.valid) {
+          setStopCamera(true);
+          setMRZData({
+            lastName: mrzParsed.fields.lastName,
+            firstName: mrzParsed.fields.firstName,
+            nationality: mrzParsed.fields.nationality,
+            documentNumber: mrzParsed.fields.documentNumber,
+          });
+          setMRZText(mrzCleaned);
+        }
+      }
+    },
+  );
 
   const frameProcessor = useFrameProcessor(frame => {
     'worklet';
 
     const mrzResult = MRZCameraPlugin.call(frame);
-    console.log({ mrzResult });
-    // console.log(`Frame: ${frame.width}x${frame.height} (${frame.pixelFormat})`);
+    const mrzParsed = mrzResult ? JSON.parse(mrzResult) : null;
+    const mrzZone =
+      mrzParsed && mrzParsed.zones && mrzParsed.zones.length > 0
+        ? mrzParsed.zones[0]
+        : null;
 
-    // // ocrResults.value = `Frame: ${frame.width}x${frame.height} (${frame.pixelFormat})`;
-    // runAtTargetFps(30, () => {
-    //   'worklet';
+    let mrzCombinedLines = '';
+    if (mrzZone) {
+      mrzCombinedLines = mrzZone.lines.reduce((currLine, line) => {
+        return line.confidence >= 90 ? currLine + line.text : currLine;
+      }, '');
+    }
 
-    //   const scannedOcr = scanOCR(frame);
-    // updateOcrValueInJS('value sended to the JS thread');
-    // });
+    const resultOCR = scanOCR(frame);
+    const resultTextSplitted =
+      resultOCR.result && resultOCR.result.text
+        ? resultOCR.result.text.split('\n')
+        : [];
+    const resultFiltered = resultTextSplitted
+      .filter(string => string.includes('<<'))
+      .map(string => string.replaceAll(' ', ''))
+      .filter(string => string.length === 44);
+
+    const isValidResult = resultFiltered.join('').length === 88;
+
+    if (mrzCombinedLines.length === 88 && isValidResult) {
+      updateOcrValueInJS({
+        isValidResult,
+        ocrResult: resultFiltered,
+        mrzCombinedLines,
+        // wrappedBox: mrzZone.wrappedBox,
+      });
+    }
   }, []);
 
   if (device == null)
@@ -300,15 +241,14 @@ function CameraView({ onCloseCamera, isCameraActive }) {
           />
           <View style={styles.boxProcessor} />
           <View style={[styles.boxProcessor, { top: '10%' }]}>
-            {/* {ocrResults?.result
-              ? ocrResults.result?.blocks?.map((block, index) => {
-                  return <Text>{block.text}</Text>;
-                })
-              : null} */}
-            <Text> {`MRZ: ${blockValid?.text ?? ''}`}</Text>
+            <Text> {`MRZ: ${mrzTextResult ?? ''}`}</Text>
+            <Text>documentNumber: {mrzData.documentNumber}</Text>
+            <Text>firstName: {mrzData.firstName}</Text>
+            <Text>lastName: {mrzData.lastName}</Text>
+            <Text>nationality: {mrzData.nationality}</Text>
           </View>
           <TouchableOpacity
-            onPress={() => setStopCamera(curr => !curr)}
+            onPress={() => null}
             style={{
               width: 80,
               height: 80,
@@ -361,35 +301,6 @@ function CameraView({ onCloseCamera, isCameraActive }) {
 export default function App() {
   const [showCamera, setShowCamera] = useState(false);
   const { hasPermission, requestPermission } = useCameraPermission();
-
-  useEffect(() => {
-    MRZScannerEvents.addListener('MRZ_NOT_INITIALIZED', result => {
-      console.log({ NATIVE_EVENT: 'MRZ_NOT_INITIALIZED', value: result });
-    });
-    MRZScannerEvents.addListener('MRZ_INITIALIZED', result => {
-      console.log({ NATIVE_EVENT: 'MRZ_INITIALIZED', value: result });
-    });
-    MRZScannerEvents.addListener('MRZ_ANALYZING_PENDING', result => {
-      console.log({ NATIVE_EVENT: 'MRZ_ANALYZING_PENDING', value: result });
-    });
-    MRZScannerEvents.addListener('MRZ_DETECTION_SUCCESSFUL', result => {
-      console.log({ NATIVE_EVENT: 'MRZ_DETECTION_SUCCESSFUL', value: result });
-    });
-    MRZScannerEvents.addListener('MRZ_INIT_WITH_DEFAULT_CONFIG', result => {
-      console.log({
-        NATIVE_EVENT: 'MRZ_INIT_WITH_DEFAULT_CONFIG',
-        value: result,
-      });
-    });
-
-    return () => {
-      MRZScannerEvents.removeAllListeners('MRZ_NOT_INITIALIZED');
-      MRZScannerEvents.removeAllListeners('MRZ_INITIALIZED');
-      MRZScannerEvents.removeAllListeners('MRZ_ANALYZING_PENDING');
-      MRZScannerEvents.removeAllListeners('MRZ_DETECTION_SUCCESSFUL');
-      MRZScannerEvents.removeAllListeners('MRZ_INIT_WITH_DEFAULT_CONFIG');
-    };
-  }, []);
 
   const verifyPermissions = async () => {
     if (hasPermission) {
